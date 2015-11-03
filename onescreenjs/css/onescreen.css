@@ -29,18 +29,33 @@
     top: 50%;
     padding: 0;
     margin: 0;
-    list-style-type: none; }
+    list-style-type: none;
+    /*li{
+            width:20px;
+            height:20px;
+            text-align:center;
+            color:#fff;
+            background-color:rgba(0, 0, 0, 0.27);
+            margin:5px;
+            border-radius:50%;
+            cursor:pointer;
+            &.active,&:hover{
+                background-color:rgba(255, 106, 0, 0.90);
+            }
+        }*/ }
     .one-screen .one-navi li {
-      width: 20px;
-      height: 20px;
+      width: 10px;
+      height: 10px;
       text-align: center;
-      color: #fff;
-      background-color: rgba(0, 0, 0, 0.27);
+      color: transparent;
+      overflow: hidden;
+      background-color: rgba(255, 255, 255, 0.8);
+      /*box-shadow:0 0 8px #ffffff;*/
       margin: 5px;
       border-radius: 50%;
       cursor: pointer; }
       .one-screen .one-navi li.active, .one-screen .one-navi li:hover {
-        background-color: rgba(255, 106, 0, 0.9); }
+        background-color: rgba(255, 106, 0, 0.8); }
   .one-screen .screen:nth-child(1) {
     top: 0%;
     background-image: url(1.jpg); }
