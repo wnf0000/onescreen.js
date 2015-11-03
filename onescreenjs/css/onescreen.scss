@@ -1,7 +1,6 @@
 ﻿@mixin screen($n) {
     .screen:nth-child(#{($n+1)}) {
         top: 100% * $n;
-        background-image:url(#{($n+1)}.jpg);
     }
 }
 html,body{
@@ -11,7 +10,7 @@ html,body{
     margin:auto;
     padding:0;
 }
-.one-screen {
+[data-ones] {
     margin:auto;
     padding:0;
     position: absolute;
@@ -30,6 +29,19 @@ html,body{
         height: 100%;
         line-height:100%;
         overflow:hidden;
+        .content{
+            position:fixed;
+            top:0;
+            left:0;
+            right:0;
+            bottom:0;
+            /*background-color:aqua;*/
+            /*display:none;*/
+            left:100%;
+        }
+        &.current .content{
+                //display:block;
+            }
     }
     .one-navi{
         position:fixed;

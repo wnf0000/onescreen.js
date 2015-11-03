@@ -2,19 +2,27 @@
     var css = {
         rootClass: 'one-screen',
         screenClass: 'screen',
+        currentScreenClass:'current',
         naviClass: 'one-navi',
-        naviActiveClass:'active'
+        naviActiveClass: 'active'
+    }
+    var attrName = {
+        onescreen: 'data-ones',
+        oneseasing: 'data-ones-easing',
+        onesduration: 'data-ones-duration'
     }
     var $window = $(window),
 
-        $oneScreen = $('.'+css.rootClass),
-        $screens = $('.'+css.screenClass, $oneScreen),
+        $oneScreen = $('[' + attrName.onescreen + ']').addClass(css.rootClass),
+        $screens = $('.' + css.screenClass, $oneScreen),
         screenHeight = $oneScreen.height(),
         isAutoScroll = false,
         lastScrollTop = 0,
         naviarray = [],
         currentScreen = 0,
-        animateDuration=1200
+        animateDuration = parseInt($oneScreen.attr(attrName.onesduration)) || 1200,
+        easing = $oneScreen.attr(attrName.oneseasing) || 'easeInOutCubic',
+        scrollStep = 30
     ;
     var $onenavi = $('<ul>').addClass(css.naviClass);
 
@@ -36,37 +44,33 @@
             lastScrollTop = $oneScreen.scrollTop();
             return;
         }
+        $oneScreen.scrollTop($oneScreen.scrollTop() + y);
         var scrollTop = $oneScreen.scrollTop();
 
         var screenNo = scrollTop / screenHeight + 1;
 
-        if (scrollTop > lastScrollTop) {//scroll down
+        if (scrollTop > lastScrollTop) {//向下滚动
             var i = parseInt(screenNo) - 1;
             var screenTop = i * screenHeight,
                     screenBottom = (i + 1) * screenHeight;
             $onenavi.children('.' + css.naviActiveClass).removeClass(css.naviActiveClass);
             naviarray[i].addClass(css.naviActiveClass);
 
-            if (screenTop + screenHeight / 2 < scrollTop && screenBottom > scrollTop) {
+            if (screenTop + scrollStep/*screenHeight / 4*/ <= scrollTop && screenBottom > scrollTop) {
                 scrollToScreen(i + 1);
             }
-            else {
-                $oneScreen.scrollTop($oneScreen.scrollTop() + y);
-            }
 
-        } else {//scroll up
+        } else {//向上滚动
             var i = parseInt(screenNo) - 1;
             var screenTop = i * screenHeight,
                     screenBottom = (i + 1) * screenHeight;
 
-            if (screenTop < scrollTop && screenTop + screenHeight / 2 > scrollTop) {
+            if (screenTop < scrollTop && screenTop + scrollStep /*screenHeight / 4*/ <= scrollTop) {
 
                 scrollToScreen(i);
             }
-            else {
-                $oneScreen.scrollTop($oneScreen.scrollTop() + y);
-            }
         }
+        lastScrollTop = $oneScreen.scrollTop();
     }
     //注册鼠标滚轮事件
     if (document.addEventListener) {
@@ -77,11 +81,11 @@
     $window.keydown(function (ev) {
         switch (ev.keyCode) {
             case 40: {
-                scroll(30);
+                scroll(scrollStep);
                 break;
             }
             case 38: {
-                scroll(-30);
+                scroll(-scrollStep);
                 break;
             }
             case 34: {//下一屏
@@ -108,26 +112,54 @@
         }
     });
     function onmousewheel(ev) {
-        var delta = ev.wheelDelta / 4;
+        var delta = ev.wheelDelta || -ev.detail;
+        if (delta < 0) {
+            delta = -scrollStep;
+        }
+        else {
+            delta = scrollStep;
+        }
         scroll(-delta);
     }
     function scrollToScreen(index) {
         isAutoScroll = true;
         $onenavi.children('.' + css.naviActiveClass).removeClass(css.naviActiveClass);
         naviarray[index].addClass(css.naviActiveClass);
-        $oneScreen.animate({ scrollTop: screenHeight * index + 'px' }, animateDuration, 'easeOutBounce', function () {
+        $oneScreen.animate({ scrollTop: screenHeight * index + 'px' }, animateDuration, easing, function () {
             isAutoScroll = false;
             lastScrollTop = $oneScreen.scrollTop();
         });
+        $screens.filter('.' + css.currentScreenClass).removeClass(css.currentScreenClass).children()
+            .animate({ 'left': '-100%', 'opacity': '0' }, 600, function () { $(this).css({ 'left': '100%' }) })
+        
+            //.removeClass(css.currentScreenClass);
+        $screens.eq(index).addClass(css.currentScreenClass).children().animate({ 'left': '0%', 'opacity': '1' },800);
         currentScreen = index;
     }
     $window.resize(function () {
         screenHeight = $oneScreen.height();
         $onenavi.css('top', (screenHeight - $onenavi.height()) / 2);
     });
+
+    $.extend($.easing, {
+        easeOutBounce: function (x, t, b, c, d) {
+            if ((t /= d) < (1 / 2.75)) {
+                return c * (7.5625 * t * t) + b;
+            } else if (t < (2 / 2.75)) {
+                return c * (7.5625 * (t -= (1.5 / 2.75)) * t + .75) + b;
+            } else if (t < (2.5 / 2.75)) {
+                return c * (7.5625 * (t -= (2.25 / 2.75)) * t + .9375) + b;
+            } else {
+                return c * (7.5625 * (t -= (2.625 / 2.75)) * t + .984375) + b;
+            }
+        }
+    });
+    $.extend($.easing, { easeInOutCubic: function (x, t, b, c, d) { if ((t /= d / 2) < 1) return c / 2 * t * t * t + b; return c / 2 * ((t -= 2) * t * t + 2) + b; } });
+    $.extend($.easing, { easeInQuart: function (x, t, b, c, d) { return c * (t /= d) * t * t * t + b; } });
     $(document).ready(function () {
-        $oneScreen.scrollTop(0);
-        naviarray[0].addClass(css.naviActiveClass);
+        //$oneScreen.scrollTop(0);
+        //naviarray[0].addClass(css.naviActiveClass);
+        scrollToScreen(0);
     });
 
 })(jQuery);
